@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset=utf-8 />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Tagging</title>
+  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.grey-blue.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <script defer src="https://code.getmdl.io/1.1.3/material.min.js"></script>
+  <style>
+    .responsive {
+      width: auto;
+      max-width: 100%;
+      height: auto;
+      max-height: 100%;
+    }
+
+    .mdl-mini-footer {
+      background-color: rgb(255, 255, 255);
+      padding: 10px;
+    }
+
+    .full-height {
+      text-align: center;
+      vertical-align: middle;
+      height: 100%;
+      width: 100%;
+    }
+
+    #text {
+      margin: 10px;
+      font-size: 14pt;
+    }
+  </style><!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-143509730-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+
+    gtag('config', 'UA-143509730-1');
+  </script>
+</head>
+
+<body>
+  <main class="mdl-layout mdl-js-layout">
+    <p id="text"></p>
+    <main class="mdl-layout__content">
+      <div class="full-height">
+        <img id='image' class="responsive" src="" />
+      </div>
+    </main>
+    <footer class="mdl-mini-footer">
+      <div class="mdl-mini-footer__left-section">
+        <button id="skip" value="skip"
+          class="mdl-mini-footer__social-btn mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">skip</button>
+      </div>
+      <div class="mdl-mini-footer__right-section">
+        <button id="no" value="no"
+          class="mdl-mini-footer__social-btn mdl-button mdl-js-button mdl-button--raised mdl-button--accent">no</button>
+        <button id="yes" value="yes"
+          class="mdl-mini-footer__social-btn mdl-button mdl-button mdl-js-button mdl-button--raised mdl-button--accent">yes</button>
+      </div>
+    </footer>
+  </main>
+  <script src="/__/firebase/6.2.0/firebase-app.js"></script>
+  <script src="/__/firebase/6.2.0/firebase-auth.js"></script>
+  <script src="/__/firebase/init.js"></script>
+  <script src="./scripts/jquery-3.4.1.min.js"></script>
+  <script src="./scripts/voting.js"></script>
+</body>
+
+</html>
