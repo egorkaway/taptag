@@ -27,7 +27,7 @@ function updateData(data) {
 
   document.getElementById('image').src = data.url
   document.getElementById('text').innerHTML =
-       '<b>This image was tagged as: ' + keyword + '</b><br>Can you confirm?'
+       'This image was tagged as: ' + keyword + '. Can you confirm?'
 
   document.getElementById('skip').disabled = false
   document.getElementById('yes').disabled = false
