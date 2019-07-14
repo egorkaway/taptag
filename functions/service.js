@@ -263,7 +263,49 @@ module.exports.getLastImageForLastKey = function(userId) {
             .getFirstImageByKey(key.id)
             .then(images => {
               if (images.empty) {
-                resolve({url: 'assets/notFound.jpg'})
+                repo.getKeyById(key.id).then(prevKey => {
+                  repo.getNotCompletedKeyAfter(prevKey).then(nextKeywords => {
+                    if (nextKeywords.empty) {
+                      resolve({url: 'assets/notFound.jpg'})
+                      return
+                    }
+
+                    nextKeywords.forEach(nextKeyword => {
+                      repo
+                        .getFirstImageByKey(nextKeyword.id)
+                        .then(nextimages => {
+                          if (nextimages.empty) {
+                            resolve({url: 'assets/notFound.jpg'})
+                            return
+                          }
+
+                          nextimages.forEach(image => {
+                            repo
+                              .getUserVoteForImageByKey(
+                                image.id,
+                                nextKeyword.id,
+                                userId,
+                              )
+                              .then(userVote => {
+                                if (userVote.empty) {
+                                  resolve({
+                                    imageId: image.id,
+                                    url: image.data().url,
+                                    keyword: nextKeyword.id,
+                                  })
+                                  return
+                                } else {
+                                  resolve({url: 'assets/notFound.jpg'})
+                                  return
+                                }
+                              })
+                              .catch(showError)
+                          })
+                          return
+                        })
+                    })
+                  })
+                })
                 return
               }
               images.forEach(image => {

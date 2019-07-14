@@ -3,7 +3,7 @@ const serviceAccount = require('./serviceAccount.json')
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://test-votes-fb.firebaseio.com',
+  databaseURL: 'https://taptag-info.firebaseio.com',
 })
 
 module.exports.fb = admin.firestore()

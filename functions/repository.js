@@ -6,11 +6,11 @@ const votesRef = db.fb.collection('votes')
 const imagesRef = db.fb.collection('images')
 const countersRef = db.fb.collection('counters')
 
-module.exports.onVote = vote => {
+module.exports.onVote = snap => {
+  let vote = snap.data()
   return new Promise((resolve, reject) => {
     if (vote.type == 'yes' || vote.type == 'no') {
       let counterRef = countersRef.doc(`${vote.keyword}_${vote.imageId}`)
-
       var counter = {
         keyword: vote.keyword,
         imageId: vote.imageId,
@@ -18,13 +18,11 @@ module.exports.onVote = vote => {
         yes: 0,
         no: 0,
       }
-
       this.getThreeVoteForImageByKey(vote.imageId, vote.keyword).then(votes => {
-        if (votes.size == 3) {
+        if (votes.size == 4) {
           counterRef
             .get()
             .then(doc => {
-              console.log(doc.data())
               if (!doc.exists) {
                 counter[vote.type] = counter[vote.type] + 1
                 counterRef.set(counter).then(x => {
@@ -34,30 +32,38 @@ module.exports.onVote = vote => {
                 var update = {}
                 update[vote.type] = FieldValue.increment(1)
                 var counterData = doc.data()
-                counterData[vote.type] = counterData[vote.type] + 1
-                if (counterData.yes * 9 < counterData.no) {
-                  update.completed = true
-                }
-                if (counterData.no * 9 < counterData.yes) {
-                  update.completed = true
-                }
-                counterRef.set(update, {merge: true}).then(x => {
-                  if (update.completed) {
-                    this.removeImageKey(vote.imageId, vote.keyword).then(x => {
-                      this.onImageComplete(vote.keyword, vote.type).then(c => {
-                        resolve(1)
-                      })
-                    })
-                  } else {
-                    resolve(1)
+                if (!counterData.completed) {
+                  counterData[vote.type] = counterData[vote.type] + 1
+                  if (counterData.yes * 9 < counterData.no) {
+                    update.completed = true
                   }
-                })
+                  if (counterData.no * 9 < counterData.yes) {
+                    update.completed = true
+                  }
+                  counterRef.set(update, {merge: true}).then(x => {
+                    if (update.completed) {
+                      this.removeImageKey(vote.imageId, vote.keyword).then(
+                        x => {
+                          this.onImageComplete(vote.keyword, vote.type).then(
+                            c => {
+                              resolve(1)
+                            },
+                          )
+                        },
+                      )
+                    } else {
+                      resolve(1)
+                    }
+                  })
+                } else {
+                  resolve(1)
+                }
               }
             })
             .catch(err => {
               console.log(err)
             })
-        } else if (votes.size == 2) {
+        } else if (votes.size == 3) {
           var allSame = true
           votes.forEach(voted => {
             allSame = allSame && voted.data().type == vote.type
@@ -93,7 +99,7 @@ module.exports.onVote = vote => {
                 console.log(err)
               })
           }
-        } else if (votes.size == 1) {
+        } else if (votes.size == 1 || votes.size == 2) {
           counterRef
             .get()
             .then(doc => {
@@ -120,30 +126,37 @@ module.exports.onVote = vote => {
           })
         }
       })
+    } else {
+      reject(2)
     }
   })
 }
 
 module.exports.onImageComplete = (keyword, type) => {
   return new Promise((resolve, reject) => {
-    let counterRef = countersRef.doc(keyword)
+    let counterRef = keywordsRef.doc(keyword)
     counterRef.get().then(counter => {
       if (counter.empty) {
-        let newDoc = {
-          yes: 0,
-          no: 0,
-          completed: false,
-        }
-        newDoc[type] = newDoc[type] + 1
-        counterRef.set(newDoc).then(x => resolve(1))
+        resolve(1)
       } else {
         let data = counter.data()
-        data[type] = data[type] + 1
-        if (data.yes == 1000 && data.no == 1000) {
-          data.completed = true
-          counterRef.set(data, {merge: true}).then(x => resolve(1))
+        if (!data.completed) {
+          let count = data[type] || 0
+          data[type] = count + 1
+          if (data.yes >= 1000 && data.no >= 1000) {
+            data.completed = true
+            counterRef.set(data, {merge: true}).then(x => {
+              resolve(1)
+            })
+          } else {
+            var update = {}
+            update[type] = FieldValue.increment(1)
+            counterRef.set(update, {merge: true}).then(x => {
+              resolve(1)
+            })
+          }
         } else {
-          counterRef.update(type, FieldValue.increment(1)).then(x => resolve(1))
+          resolve(1)
         }
       }
     })
@@ -279,19 +292,30 @@ module.exports.getThreeVoteForImageByKey = (imageId, keyword) => {
     .orderBy('timestamp', 'desc')
     .where('imageId', '==', imageId)
     .where('keyword', '==', keyword)
-    .limit(3)
+    .limit(4)
     .get()
 }
 
 module.exports.removeImageKey = (imageId, keyword) => {
-  return this.getImageById(imageId).then(image => {
-    if (!image.empty) {
-      let keywords = image.data().keywords
-      var index = keywords.indexOf(keyword)
-      if (index !== -1) {
-        image.keywords.splice(index, 1)
-        return imagesRef.doc(imageId).update('keywords', keywords)
+  return new Promise((resolve, reject) => {
+    this.getImageById(imageId).then(image => {
+      if (!image.empty) {
+        let keywords = image.data().keywords
+        var index = keywords.indexOf(keyword)
+        if (index !== -1) {
+          keywords.splice(index, 1)
+          imagesRef
+            .doc(imageId)
+            .set({keywords: keywords}, {merge: true})
+            .then(x => {
+              resolve(1)
+            })
+        } else {
+          resolve(1)
+        }
+      } else {
+        resolve(1)
       }
-    }
+    })
   })
 }
