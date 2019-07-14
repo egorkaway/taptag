@@ -26,8 +26,7 @@ function updateData(data) {
   keyword = data.keyword || ''
 
   document.getElementById('image').src = data.url
-  document.getElementById('text').innerHTML =
-       'This image was tagged as: ' + keyword + '. Can you confirm?'
+  document.getElementById('text').innerHTML = 'This image was tagged as: ' + keyword + '. Can you confirm?'
 
   document.getElementById('skip').disabled = false
   document.getElementById('yes').disabled = false
