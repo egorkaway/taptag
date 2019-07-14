@@ -32,7 +32,8 @@ module.exports.onVote = snap => {
                 var update = {}
                 update[vote.type] = FieldValue.increment(1)
                 var counterData = doc.data()
-                if (!counterData.completed) {
+                // if (!counterData.completed) {
+                if (counterData) {
                   counterData[vote.type] = counterData[vote.type] + 1
                   if (counterData.yes * 9 < counterData.no) {
                     update.completed = true
