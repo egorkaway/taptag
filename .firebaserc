@@ -1,7 +1,5 @@
 {
   "projects": {
-    "default": "test-votes-fb",
-    "dev": "voting-70e30",
-    "staging": "taptag-info"
+    "default": "taptag-info",
   }
 }

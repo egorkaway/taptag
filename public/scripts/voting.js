@@ -96,7 +96,6 @@ function skip() {
 }
 
 function error() {
-  console.log('error')
   clear()
 
   $.post(

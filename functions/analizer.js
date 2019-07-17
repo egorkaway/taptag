@@ -4,8 +4,10 @@ const request = require('request')
 const querystring = require('querystring')
 const FieldValue = require('firebase-admin').firestore.FieldValue
 
-const username = '...'
-const password = '...'
+const everypixel = require('./everypixelConfig.json')
+console.log(everypixel)
+const username = everypixel.username
+const password = everypixel.password
 const auth =
   'Basic ' + Buffer.from(username + ':' + password).toString('base64')
 
@@ -17,7 +19,6 @@ let startAfter = null
 
 module.exports.startKeywords = function() {
   cron.schedule('*/5 * * * * *', function() {
-    console.log(startAfter, new Date())
     if (startAfter > new Date()) return
     let ref = imagesRef
       .where('keywordsProcessed', '==', false)
@@ -32,7 +33,6 @@ module.exports.startKeywords = function() {
         snapshot.forEach(doc => {
           imagesRef.doc(doc.id).set({keywordsProcessed: true}, {merge: true})
           let encodedUrl = querystring.escape(doc.data().url)
-          console.log(encodedUrl)
           var options = {
             url: `https://api.everypixel.com/v1/keywords?url=${encodedUrl}&num_keywords=10`,
             headers: {
