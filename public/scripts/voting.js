@@ -26,7 +26,8 @@ function updateData(data) {
   keyword = data.keyword || ''
 
   document.getElementById('image').src = data.url
-  document.getElementById('text').innerHTML = '<b>This image was tagged as: ' + keyword + '.</b><br> Do you agree?'
+  document.getElementById('text').innerHTML =
+    '<b>This image was tagged as: ' + keyword + '.</b><br> Do you agree?'
 
   document.getElementById('skip').disabled = false
   document.getElementById('yes').disabled = false
@@ -37,7 +38,7 @@ function clear() {
   document.getElementById('skip').disabled = true
   document.getElementById('yes').disabled = true
   document.getElementById('no').disabled = true
-  document.getElementById('image').src = ''
+  document.getElementById('image').src = 'assets/loading.gif'
   document.getElementById('text').innerHTML = ''
 }
 
@@ -94,8 +95,24 @@ function skip() {
   )
 }
 
+function error() {
+  console.log('error')
+  clear()
+
+  $.post(
+    `${host}api/images/remove`,
+    {
+      userId: userId,
+      imageId: imageId,
+      keyword: keyword,
+    },
+    success,
+  )
+}
+
 clear()
 
+document.getElementById('image').addEventListener('error', error, false)
 document.getElementById('skip').addEventListener('click', skip, false)
 document.getElementById('yes').addEventListener('click', yes, false)
 document.getElementById('no').addEventListener('click', no, false)

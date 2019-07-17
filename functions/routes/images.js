@@ -16,8 +16,14 @@ router.post('/', function(req, res, next) {
 
 router.post('/remove', function(req, res, next) {
   let imageId = req.body.imageId
-  repo.removeImage(imageId)
-  res.send({status: 'success'})
+  let userId = req.body.userId
+  let keyword = req.body.keyword
+
+  repo.removeImage(imageId).then(x => {
+    service.next(userId).then(data => {
+      res.send(data)
+    })
+  })
 })
 
 router.get('/page', function(req, res) {
